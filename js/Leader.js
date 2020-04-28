@@ -1,9 +1,11 @@
+import { isIntersecting } from './util.js';
+
 class Leader {
     BRANCH_CHANCE = 0.3;
     FORK_CHANCE = 0.05;
     MIN_DIAMETER = 0.1;
     // Percentage of diameter retained each segment
-    TAPER_RATIO = 0.9;
+    TAPER_RATIO = 0.92;
     MAX_ANGLE_NOISE = PI / 16;
 
     constructor(tree, diameter, position) {
@@ -55,6 +57,16 @@ class Leader {
             this.segments[i].draw();
         }
     }
+
+    // Check if any segments are shading a given position
+    isShading = (position) => {
+        for (let i = 0; i < this.segments.length; i++) {
+            if (this.segments[i].isShading(position)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
@@ -67,10 +79,27 @@ class Segment {
         this.endPosition = endPosition;
     }
 
+    // Draw the segment
     draw = () => {
         stroke(255);
         strokeWeight(this.startDiameter);
         line(this.startPosition.x, this.startPosition.y, this.endPosition.x, this.endPosition.y);
+    }
+
+    // Check if a given coordinate is underneath this segment
+    isShading = (position, sunAngle = 0) => {
+        // Cast a ray directly towards the sun
+        let rayDir = createVector(0, -9999);
+        rayDir.rotate(sunAngle);
+
+        let rayStartPosition = position;
+        let rayEndPosition = p5.Vector.add(rayStartPosition, rayDir);
+
+        // If the ray intersects with this segment, the position is shaded
+        if (isIntersecting(this.startPosition, this.endPosition, rayStartPosition, rayEndPosition)) {
+            return true;
+        }
+        return false;
     }
 }
 
