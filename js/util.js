@@ -4,6 +4,9 @@ const ORIENTATION = {
     CCW: 2
 }
 
+const STARTING_SEED = 1;
+let seed = STARTING_SEED;
+
 // Check if two lines segments (p1-q1 and p2-q2) intersect at any point
 export const isIntersecting = (p1, q1, p2, q2) => {
     let o1 = getOrientation(p1, q1, p2);
@@ -61,4 +64,20 @@ const getOrientation = (p, q, r) => {
     }
 
     return orientation;
+}
+
+// Generate a random number within a range
+export const randRange = (min, max) => {
+    return rand() * (max - min) + min;
+}
+
+// Generate a random number using a seed
+export const rand = () => {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
+// Reset the random seed
+export const resetSeed = () => {
+    seed = STARTING_SEED;
 }
