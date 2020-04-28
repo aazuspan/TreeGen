@@ -1,3 +1,6 @@
+import Branch from "./Branch.js";
+
+
 const windowWidth = 600;
 const windowHeight = 650;
 
@@ -8,6 +11,7 @@ let seed = STARTING_SEED;
 let slider;
 let generateButton;
 let angle;
+let tree = [];
 
 // Max variability in length for any given branch
 const LENGTH_VARIABILITY = 0.33;
@@ -16,6 +20,7 @@ const LENGTH_MULTIPLIER = 0.7;
 const ANGLE_VARIABILITY = Math.PI / 4;
 const MIN_BRANCHES = 1;
 const MAX_BRANCHES = 2;
+const MAX_DEPTH = 10;
 
 // P5 setup
 function setup() {
@@ -28,7 +33,6 @@ function setup() {
   slider.changed(generate);
 
   background(50);
-
   generate();
 }
 
@@ -41,8 +45,32 @@ const generate = () => {
   stroke(255);
   angle = slider.value();
   background(50);
-  branch(160, 1, 12);
+  //branch(160, 1, 12);
+
+  let branch = new Branch(createVector(0, 0), createVector(0, -100));
+  tree.push(branch);
+
+  // Create all branches
+  for (let i = 0; i < MAX_DEPTH; i++) {
+    for (let j = tree.length - 1; j >= 0; j--) {
+      // If the branch has no subbranches yet
+      if (tree[j].children.length === 0) {
+        let subBranches = tree[j].branch();
+        for (let k = 0; k < subBranches.length; k++) {
+          tree.push(subBranches[k]);
+        }
+      }
+    }
+  }
+
+  // Draw all branches
+  for (let i = 0; i < tree.length; i++) {
+    tree[i].draw();
+  }
 }
+
+
+/*
 
 // Recursively generate a branch and its subbranches
 const branch = (len, depth = 1, maxDepth = 12) => {
@@ -76,6 +104,8 @@ const branch = (len, depth = 1, maxDepth = 12) => {
   }
 }
 
+*/
+
 // Generate a random number within a range
 const randRange = (min, max) => {
   return rand() * (max - min) + min;
@@ -91,3 +121,7 @@ const rand = () => {
 const resetSeed = () => {
   seed = STARTING_SEED;
 }
+
+// This is required by p5 when this script is loaded as a module
+window.setup = setup;
+window.draw = draw;
