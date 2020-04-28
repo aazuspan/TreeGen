@@ -1,4 +1,4 @@
-import Leader from './Leader.js';
+import ApicalMeristem from './ApicalMeristem.js';
 
 
 const windowWidth = 600;
@@ -8,7 +8,7 @@ const windowHeight = 650;
 function setup() {
     createCanvas(windowWidth, windowHeight);
     background(50);
-    let leader = new Leader(null, 16, createVector(width / 2, height));
+    let leader = new ApicalMeristem(null, 16, createVector(width / 2, height));
     leader.grow();
     leader.draw();
 }
