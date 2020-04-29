@@ -4,17 +4,19 @@ import Internode from './Internode.js';
 
 // Represents the terminal growing point of a branch
 class ApicalMeristem {
-    BRANCH_CHANCE = 0.3;
-    FORK_CHANCE = 0.5;
+    BRANCH_CHANCE = 0.1;
+    FORK_CHANCE = 0.02;
     DIE_CHANCE = 0.001;
     MIN_DIAMETER = 0.5;
     // Percentage of diameter retained each internode
-    TAPER_RATIO = 0.92;
+    TAPER_RATIO = 0.93;
     // Amount of Perlin noise to add to angle every growth period
-    MAX_ANGLE_NOISE = PI / 3;
+    MAX_ANGLE_NOISE = PI / 4;
     // Ratio to push branches upwards every growth period
     SHADE_INTOLERANCE = 0.1;
 
+    // Minimum height, relative to root, where branches and forks can begin
+    MINIMUM_BRANCH_HEIGHT = 200;
     // Mean angle of new branches, relative to the angle of this branch
     BRANCH_ANGLE_MEAN = PI / 3;
     // Standard deviation of new branch angle distribution
@@ -24,7 +26,7 @@ class ApicalMeristem {
     // Standard deviation of new fork angle distribution
     FORK_ANGLE_SD = PI / 16;
     // Diameter reduction for new branches
-    BRANCH_DIAMETER_RATIO = 0.4;
+    BRANCH_DIAMETER_RATIO = 0.5;
     // Diameter reduction for new forks
     FORK_DIAMETER_RATIO = 0.8;
 
@@ -61,11 +63,13 @@ class ApicalMeristem {
             this.diameter = endDiameter;
             this.internodeLength = this.diameter * 3;
 
-            if (this.forked()) {
-                this.fork();
-            }
-            else if (this.branched()) {
-                this.branch();
+            if (this.position.y < this.tree.position.y - this.MINIMUM_BRANCH_HEIGHT) {
+                if (this.forked()) {
+                    this.fork();
+                }
+                else if (this.branched()) {
+                    this.branch();
+                }
             }
         }
     }
@@ -122,8 +126,9 @@ class ApicalMeristem {
         angleNoise = map(angleNoise, 0, 1, -this.MAX_ANGLE_NOISE, this.MAX_ANGLE_NOISE);
         updatedAngle += angleNoise;
 
-        // Push angle upwards
-        updatedAngle = lerp(updatedAngle, 0, this.SHADE_INTOLERANCE);
+        // Grow upwards
+        let targetAngle = 0;
+        updatedAngle = lerp(updatedAngle, targetAngle, this.SHADE_INTOLERANCE);
 
         return updatedAngle;
     }
@@ -134,6 +139,14 @@ class ApicalMeristem {
             if (this.internodes[i].isShading(position)) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    // Check if this apical meristem is shaded by any branch on the tree
+    isShaded = () => {
+        if (this.tree.isShaded(this.position)) {
+            return true;
         }
         return false;
     }

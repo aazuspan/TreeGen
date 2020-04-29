@@ -7,7 +7,7 @@ class Tree {
         this.apicalMeristems = [];
         this.position = position;
 
-        let leader = new ApicalMeristem(this, 32, this.position);
+        let leader = new ApicalMeristem(this, 25, this.position);
         this.apicalMeristems.push(leader);
     }
 
@@ -34,6 +34,16 @@ class Tree {
     // Remove all branches within a certain distance of the ground
     prune = () => {
 
+    }
+
+    // Check each internode to see if it is shading a given position
+    isShaded = (position) => {
+        for (let i = 0; i < this.internodes.length; i++) {
+            if (this.internodes[i].isShading(position)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

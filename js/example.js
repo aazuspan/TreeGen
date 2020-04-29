@@ -1,8 +1,8 @@
 import Tree from './Tree.js';
 
 
-const windowWidth = 600;
-const windowHeight = 650;
+const windowWidth = 640;
+const windowHeight = 960;
 
 // P5 setup
 function setup() {
@@ -10,7 +10,7 @@ function setup() {
     background(50);
     let treePosition = createVector(width / 2, height);
     let tree = new Tree(treePosition);
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 80; i++) {
         tree.grow();
     }
 

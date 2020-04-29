@@ -23,7 +23,7 @@ export const isIntersecting = (p1, q1, p2, q2) => {
 
     // Colinear rules
     if (o1 === 0 && isOnSegment(p1, p2, q1)) {
-        interesect = true;
+        intersect = true;
     }
     if (o2 === 0 && isOnSegment(p1, q2, q1)) {
         intersect = true;
