@@ -1,4 +1,4 @@
-import ApicalMeristem from './ApicalMeristem.js';
+import Tree from './Tree.js';
 
 
 const windowWidth = 600;
@@ -8,9 +8,13 @@ const windowHeight = 650;
 function setup() {
     createCanvas(windowWidth, windowHeight);
     background(50);
-    let leader = new ApicalMeristem(null, 16, createVector(width / 2, height));
-    leader.grow();
-    leader.draw();
+    let treePosition = createVector(width / 2, height);
+    let tree = new Tree(treePosition);
+    for (let i = 0; i < 50; i++) {
+        tree.grow();
+    }
+
+    tree.draw();
 }
 
 function draw() {

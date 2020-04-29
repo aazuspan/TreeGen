@@ -4,7 +4,7 @@ const ORIENTATION = {
     CCW: 2
 }
 
-const STARTING_SEED = 1;
+const STARTING_SEED = new Date().getTime();
 let seed = STARTING_SEED;
 
 // Check if two lines segments (p1-q1 and p2-q2) intersect at any point
@@ -71,13 +71,26 @@ export const randRange = (min, max) => {
     return rand() * (max - min) + min;
 }
 
-// Generate a random number using a seed
+// Generate a random number using a seed, between 0 and 1
 export const rand = () => {
     let x = Math.sin(seed++) * 10000;
     return x - Math.floor(x);
 }
 
+// Return a random integer between min and max, inclusive
+export const randInt = (min, max) => {
+    return Math.floor(randRange(min, max + 1));
+}
+
+
 // Reset the random seed
 export const resetSeed = () => {
     seed = STARTING_SEED;
+}
+
+// Choose a random element from an array
+export const randChoice = (array) => {
+    let randIndex = randInt(0, array.length - 1);
+
+    return array[randIndex];
 }
