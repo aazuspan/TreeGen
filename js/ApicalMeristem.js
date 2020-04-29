@@ -1,4 +1,4 @@
-import { rand, randChoice } from './util.js';
+import { lerp, rand, randChoice } from './util.js';
 import Internode from './Internode.js';
 
 
@@ -7,10 +7,13 @@ class ApicalMeristem {
     BRANCH_CHANCE = 0.3;
     FORK_CHANCE = 0.5;
     DIE_CHANCE = 0.001;
-    MIN_DIAMETER = 1;
+    MIN_DIAMETER = 0.5;
     // Percentage of diameter retained each internode
     TAPER_RATIO = 0.92;
-    MAX_ANGLE_NOISE = PI / 16;
+    // Amount of Perlin noise to add to angle every growth period
+    MAX_ANGLE_NOISE = PI / 3;
+    // Ratio to push branches upwards every growth period
+    SHADE_INTOLERANCE = 0.1;
 
     // Mean angle of new branches, relative to the angle of this branch
     BRANCH_ANGLE_MEAN = PI / 3;
@@ -21,7 +24,7 @@ class ApicalMeristem {
     // Standard deviation of new fork angle distribution
     FORK_ANGLE_SD = PI / 16;
     // Diameter reduction for new branches
-    BRANCH_DIAMETER_RATIO = 0.6;
+    BRANCH_DIAMETER_RATIO = 0.4;
     // Diameter reduction for new forks
     FORK_DIAMETER_RATIO = 0.8;
 
@@ -44,7 +47,7 @@ class ApicalMeristem {
             let endDiameter = this.diameter * this.TAPER_RATIO;
             let internodeStart = this.position;
 
-            this.updateAngle();
+            this.angle = this.updateAngle();
 
             let internodeDir = createVector(0, -this.internodeLength);
             internodeDir.rotate(this.angle);
@@ -58,10 +61,7 @@ class ApicalMeristem {
             this.diameter = endDiameter;
             this.internodeLength = this.diameter * 3;
 
-            if (this.died()) {
-                this.die();
-            }
-            else if (this.forked()) {
+            if (this.forked()) {
                 this.fork();
             }
             else if (this.branched()) {
@@ -115,19 +115,17 @@ class ApicalMeristem {
         return false;
     }
 
-    // Chance for this meristem to die without branching or forking
-    died = () => {
-        if (rand() < this.DIE_CHANCE) {
-            return true;
-        }
-        return false;
-    }
-
     // Adjust the angle of the leader by adding Perlin noise
     updateAngle = () => {
+        let updatedAngle = this.angle;
         let angleNoise = noise(this.position.x, this.position.y);
         angleNoise = map(angleNoise, 0, 1, -this.MAX_ANGLE_NOISE, this.MAX_ANGLE_NOISE);
-        this.angle += angleNoise;
+        updatedAngle += angleNoise;
+
+        // Push angle upwards
+        updatedAngle = lerp(updatedAngle, 0, this.SHADE_INTOLERANCE);
+
+        return updatedAngle;
     }
 
     // Check if any internodes are shading a given position

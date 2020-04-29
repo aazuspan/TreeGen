@@ -94,3 +94,8 @@ export const randChoice = (array) => {
 
     return array[randIndex];
 }
+
+// Linear interpolate between two values based on the amount (distance between the two values)
+export const lerp = (currentValue, targetValue, amount) => {
+    return currentValue + (amount * (targetValue - currentValue));
+}
