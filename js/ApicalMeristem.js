@@ -6,17 +6,16 @@ import Internode from './Internode.js';
 class ApicalMeristem {
     BRANCH_CHANCE = 0.25;
     FORK_CHANCE = 0.2;
-    DIE_CHANCE = 0.001;
     MIN_DIAMETER = 0.5;
     // Percentage of diameter retained each internode
-    TAPER_RATIO = 0.95;
+    TAPER_RATIO = 0.94;
     // Amount of Perlin noise to add to angle every growth period
-    MAX_ANGLE_NOISE = PI / 5;
+    MAX_ANGLE_NOISE = PI / 6;
     // Ratio to push branches upwards every growth period
     SHADE_INTOLERANCE = 0.1;
 
     // Minimum height, relative to root, where branches and forks can begin
-    MINIMUM_BRANCH_HEIGHT = 200;
+    MINIMUM_BRANCH_HEIGHT = 100;
     // Mean angle of new branches, relative to the angle of this branch
     BRANCH_ANGLE_MEAN = PI / 3;
     // Standard deviation of new branch angle distribution

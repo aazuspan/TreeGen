@@ -1,9 +1,11 @@
 import ApicalMeristem from "./ApicalMeristem.js";
+import Leaf from "./Leaf.js";
 
 
 class Tree {
     constructor(position) {
         this.internodes = [];
+        this.leaves = [];
         this.apicalMeristems = [];
         this.position = position;
 
@@ -23,17 +25,23 @@ class Tree {
         for (let i = 0; i < this.internodes.length; i++) {
             this.internodes[i].draw();
         }
+
+        this.drawLeaves();
+    }
+
+    drawLeaves = () => {
+        for (let i = 0; i < this.apicalMeristems.length; i++) {
+            let leafPosition = createVector(this.apicalMeristems[i].position.x, this.apicalMeristems[i].position.y);
+            let leafAngle = this.apicalMeristems[i].angle;
+            let leaf = new Leaf(leafPosition, leafAngle);
+            leaf.draw();
+        }
     }
 
     // Remove a single meristem object from the active meristems
     removeApicalMeristem = (apicalMeristem) => {
         let removeIndex = this.apicalMeristems.indexOf(apicalMeristem);
         this.apicalMeristems.splice(removeIndex, 1);
-    }
-
-    // Remove all branches within a certain distance of the ground
-    prune = () => {
-
     }
 
     // Check each internode to see if it is shading a given position

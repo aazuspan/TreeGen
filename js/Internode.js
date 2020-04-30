@@ -13,7 +13,7 @@ class Internode {
 
     // Draw the segment
     draw = () => {
-        stroke(255);
+        stroke(30, 20, 10);
         strokeWeight(this.startDiameter);
         line(this.startPosition.x, this.startPosition.y, this.endPosition.x, this.endPosition.y);
     }
