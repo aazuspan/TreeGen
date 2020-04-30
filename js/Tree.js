@@ -9,7 +9,7 @@ class Tree {
         this.apicalMeristems = [];
         this.position = position;
 
-        let leader = new ApicalMeristem(this, 25, this.position);
+        let leader = new ApicalMeristem(this, 35, this.position);
         this.apicalMeristems.push(leader);
     }
 

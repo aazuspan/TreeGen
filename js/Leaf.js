@@ -1,8 +1,8 @@
 import { randRange } from "./util.js";
 
 class Leaf {
-    LEAF_SIZE_MEAN = 10;
-    LEAF_SIZE_SD = 6;
+    LEAF_SIZE_MEAN = 8;
+    LEAF_SIZE_SD = 2;
 
     constructor(position, angle) {
         this.position = position;

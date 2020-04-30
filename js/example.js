@@ -7,7 +7,7 @@ const windowHeight = 960;
 // P5 setup
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    background(50);
+    background(255);
     let treePosition = createVector(width / 2, height);
     let tree = new Tree(treePosition);
     for (let i = 0; i < 80; i++) {

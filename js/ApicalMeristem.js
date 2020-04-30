@@ -1,32 +1,32 @@
-import { lerp, rand, randChoice } from './util.js';
+import { lerp, rand, randChoice, NormalDistribution } from './util.js';
 import Internode from './Internode.js';
 
 
 // Represents the terminal growing point of a branch
 class ApicalMeristem {
-    BRANCH_CHANCE = 0.25;
-    FORK_CHANCE = 0.2;
+    BRANCH_CHANCE = 0.8;
+    FORK_CHANCE = 0.4;
     MIN_DIAMETER = 0.5;
     // Percentage of diameter retained each internode
-    TAPER_RATIO = 0.94;
+    TAPER_RATIO = 0.92;
     // Amount of Perlin noise to add to angle every growth period
-    MAX_ANGLE_NOISE = PI / 6;
+    MAX_ANGLE_NOISE = 0.4;
     // Ratio to push branches upwards every growth period
-    SHADE_INTOLERANCE = 0.1;
+    SHADE_INTOLERANCE = new NormalDistribution(0.1, 0.02);
 
     // Minimum height, relative to root, where branches and forks can begin
     MINIMUM_BRANCH_HEIGHT = 100;
-    // Mean angle of new branches, relative to the angle of this branch
-    BRANCH_ANGLE_MEAN = PI / 3;
-    // Standard deviation of new branch angle distribution
-    BRANCH_ANGLE_SD = PI / 16;
-    // Mean angle of new forked branches, relative to the angle of this branch
-    FORK_ANGLE_MEAN = PI / 5;
-    // Standard deviation of new fork angle distribution
-    FORK_ANGLE_SD = PI / 16;
-    BRANCH_AREA_RATIO = 0.25;
+    // Distribution of branch angles, relative to angle of the parent branch
+    BRANCH_ANGLE = new NormalDistribution(PI / 3, 0.2);
+    // Distribution of fork angles, relative to the angle of the parent branch
+    FORK_ANGLE = new NormalDistribution(PI / 5, 0.2);
+    // Proportion of area to retain when branching. Used to calculate diameter
+    BRANCH_AREA_RATIO = new NormalDistribution(0.25, 0.05);
     // Proportion of area to retain when forking. Used to calculate fork diameter
-    FORK_AREA_RATIO = 0.5;
+    FORK_AREA_RATIO = new NormalDistribution(0.5, 0.1);
+
+    // Internode length multiplier relative to diameter
+    INTERNODE_LENGTH_MULTIPLIER = 1.8;
 
     constructor(tree, diameter, position, angle = 0) {
         this.tree = tree;
@@ -34,9 +34,10 @@ class ApicalMeristem {
         this.position = position;
         this.angle = angle;
         // Length of each internode between nodes
-        this.internodeLength = this.diameter * 3;
+        this.internodeLength = this.diameter * this.INTERNODE_LENGTH_MULTIPLIER;
         // An array of line internodes representing each growth 
         this.internodes = [];
+        this.distanceSinceLastBranch = 0;
     }
 
     // Keep growing internodes until diameter tapers to minimum
@@ -58,7 +59,7 @@ class ApicalMeristem {
 
             this.position = internodeEnd;
             this.diameter = endDiameter;
-            this.internodeLength = this.diameter * 3;
+            this.internodeLength = this.diameter * this.INTERNODE_LENGTH_MULTIPLIER;
 
             if (this.position.y < this.tree.position.y - this.MINIMUM_BRANCH_HEIGHT) {
                 if (this.forked()) {
@@ -66,6 +67,9 @@ class ApicalMeristem {
                 }
                 else if (this.branched()) {
                     this.branch();
+                }
+                else {
+                    this.distanceSinceLastBranch += this.internodeLength;
                 }
             }
         }
@@ -85,33 +89,40 @@ class ApicalMeristem {
     }
 
     // A new apical meristem is created at this apical meristem, growing generally outwards
-    branch = (angle = null, areaProportion = this.BRANCH_AREA_RATIO) => {
+    branch = (angle = null, areaProportion = this.BRANCH_AREA_RATIO.value()) => {
         if (angle === null) {
             let direction = randChoice([1, -1]);
-            angle = this.angle + randomGaussian(this.BRANCH_ANGLE_MEAN, this.BRANCH_ANGLE_SD) * direction;
+            angle = this.angle + this.BRANCH_ANGLE.value() * direction;
         }
 
         let branchDiameter = this.getDiameter(this.diameter, areaProportion);
         let newApicalMeristem = new ApicalMeristem(this.tree, branchDiameter, this.position, angle);
         this.tree.apicalMeristems.push(newApicalMeristem);
+        this.distanceSinceLastBranch = 0;
+
+        // Branch both directions
+        if (rand() < 0.2) {
+            this.branch(-angle);
+        }
     }
 
     // This meristem dies and creates two new meristems splitting out
     fork = () => {
         let forkAngles = [
-            this.angle + randomGaussian(this.FORK_ANGLE_MEAN, this.FORK_ANGLE_SD),
-            this.angle + randomGaussian(this.FORK_ANGLE_MEAN, this.FORK_ANGLE_SD) * -1
+            this.angle + this.FORK_ANGLE.value(),
+            this.angle + this.FORK_ANGLE.value() * -1
         ];
 
         for (let i = 0; i < forkAngles.length; i++) {
-            this.branch(forkAngles[i], this.FORK_AREA_RATIO);
+            this.branch(forkAngles[i], this.FORK_AREA_RATIO.value());
         }
         this.die();
     }
 
     // Chance to create a new branch with a growing point off of this branch
     branched = () => {
-        if (rand() < this.BRANCH_CHANCE) {
+        //console.log(this.BRANCH_CHANCE + this.distanceSinceLastBranch / this.internodeLength)
+        if (rand() < (this.BRANCH_CHANCE)) {
             return true;
         }
         return false;
@@ -134,7 +145,7 @@ class ApicalMeristem {
 
         // Grow upwards
         let targetAngle = 0;
-        updatedAngle = lerp(updatedAngle, targetAngle, this.SHADE_INTOLERANCE);
+        updatedAngle = lerp(updatedAngle, targetAngle, this.SHADE_INTOLERANCE.value());
 
         return updatedAngle;
     }

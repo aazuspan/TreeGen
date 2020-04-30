@@ -99,3 +99,17 @@ export const randChoice = (array) => {
 export const lerp = (currentValue, targetValue, amount) => {
     return currentValue + (amount * (targetValue - currentValue));
 }
+
+
+// A normally distributed variable
+export class NormalDistribution {
+    constructor(mean, sd) {
+        this.mean = mean;
+        this.sd = sd;
+    };
+
+    // Return a normally distributed 
+    value = () => {
+        return randomGaussian(this.mean, this.sd);
+    }
+}
