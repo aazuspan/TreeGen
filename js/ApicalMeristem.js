@@ -4,14 +4,14 @@ import Internode from './Internode.js';
 
 // Represents the terminal growing point of a branch
 class ApicalMeristem {
-    BRANCH_CHANCE = 0.1;
-    FORK_CHANCE = 0.02;
+    BRANCH_CHANCE = 0.25;
+    FORK_CHANCE = 0.2;
     DIE_CHANCE = 0.001;
     MIN_DIAMETER = 0.5;
     // Percentage of diameter retained each internode
-    TAPER_RATIO = 0.93;
+    TAPER_RATIO = 0.95;
     // Amount of Perlin noise to add to angle every growth period
-    MAX_ANGLE_NOISE = PI / 4;
+    MAX_ANGLE_NOISE = PI / 5;
     // Ratio to push branches upwards every growth period
     SHADE_INTOLERANCE = 0.1;
 
@@ -25,10 +25,9 @@ class ApicalMeristem {
     FORK_ANGLE_MEAN = PI / 5;
     // Standard deviation of new fork angle distribution
     FORK_ANGLE_SD = PI / 16;
-    // Diameter reduction for new branches
-    BRANCH_DIAMETER_RATIO = 0.5;
-    // Diameter reduction for new forks
-    FORK_DIAMETER_RATIO = 0.8;
+    BRANCH_AREA_RATIO = 0.25;
+    // Proportion of area to retain when forking. Used to calculate fork diameter
+    FORK_AREA_RATIO = 0.5;
 
     constructor(tree, diameter, position, angle = 0) {
         this.tree = tree;
@@ -41,7 +40,6 @@ class ApicalMeristem {
         this.internodes = [];
     }
 
-    // TODO: In order to accurately simulate growth, diameter should start small. As sub-branches are added, all upstream branches should increase a small amount in diameter
     // Keep growing internodes until diameter tapers to minimum
     grow = () => {
         if (this.diameter > this.MIN_DIAMETER) {
@@ -74,19 +72,28 @@ class ApicalMeristem {
         }
     }
 
+    // Calculate the branch diameter that has a given proportion of the area of a given diameter
+    getDiameter = (currentDiameter, areaProportion) => {
+        let currentArea = PI * Math.pow(currentDiameter / 2, 2);
+        let targetArea = currentArea * areaProportion;
+        let targetDiameter = Math.sqrt(targetArea / PI) * 2;
+        return targetDiameter;
+    }
+
     // This meristem dies and is removed from the tree's active growing points
     die = () => {
         this.tree.removeApicalMeristem(this);
     }
 
     // A new apical meristem is created at this apical meristem, growing generally outwards
-    branch = (angle = null, diameterRatio = this.BRANCH_DIAMETER_RATIO) => {
+    branch = (angle = null, areaProportion = this.BRANCH_AREA_RATIO) => {
         if (angle === null) {
             let direction = randChoice([1, -1]);
             angle = this.angle + randomGaussian(this.BRANCH_ANGLE_MEAN, this.BRANCH_ANGLE_SD) * direction;
         }
 
-        let newApicalMeristem = new ApicalMeristem(this.tree, this.diameter * diameterRatio, this.position, angle);
+        let branchDiameter = this.getDiameter(this.diameter, areaProportion);
+        let newApicalMeristem = new ApicalMeristem(this.tree, branchDiameter, this.position, angle);
         this.tree.apicalMeristems.push(newApicalMeristem);
     }
 
@@ -98,7 +105,7 @@ class ApicalMeristem {
         ];
 
         for (let i = 0; i < forkAngles.length; i++) {
-            this.branch(forkAngles[i], this.FORK_DIAMETER_RATIO);
+            this.branch(forkAngles[i], this.FORK_AREA_RATIO);
         }
         this.die();
     }
