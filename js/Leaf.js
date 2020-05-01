@@ -4,7 +4,8 @@ class Leaf {
     LEAF_SIZE_MEAN = 8;
     LEAF_SIZE_SD = 2;
 
-    constructor(position, angle) {
+    constructor(position, angle, depth) {
+        this.depth = depth;
         this.position = position;
         this.angle = angle;
         this.size = randomGaussian(this.LEAF_SIZE_MEAN, this.LEAF_SIZE_SD);

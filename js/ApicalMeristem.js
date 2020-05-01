@@ -6,14 +6,15 @@ import Internode from './Internode.js';
 class ApicalMeristem {
     BRANCH_CHANCE = 0.8;
     FORK_CHANCE = 0.4;
+    DOUBLE_BRANCH_CHANCE = 0.2;
     MIN_DIAMETER = 0.5;
     // Percentage of diameter retained each internode
-    TAPER_RATIO = 0.92;
+    TAPER_RATIO = 0.94;
     // Amount of Perlin noise to add to angle every growth period
     MAX_ANGLE_NOISE = 0.4;
+
     // Ratio to push branches upwards every growth period
     SHADE_INTOLERANCE = new NormalDistribution(0.1, 0.02);
-
     // Minimum height, relative to root, where branches and forks can begin
     MINIMUM_BRANCH_HEIGHT = 100;
     // Distribution of branch angles, relative to angle of the parent branch
@@ -101,7 +102,7 @@ class ApicalMeristem {
         this.distanceSinceLastBranch = 0;
 
         // Branch both directions
-        if (rand() < 0.2) {
+        if (rand() < this.DOUBLE_BRANCH_CHANCE) {
             this.branch(-angle);
         }
     }

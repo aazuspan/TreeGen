@@ -1,8 +1,12 @@
 import ApicalMeristem from "./ApicalMeristem.js";
 import Leaf from "./Leaf.js";
+import { randChoice, rand } from './util.js';
 
 
 class Tree {
+    // Percent of meristems that should have leaves
+    LEAF_PERCENTAGE = 0.25;
+
     constructor(position) {
         this.internodes = [];
         this.leaves = [];
@@ -22,19 +26,39 @@ class Tree {
 
     // Draw all the internodes that make up the tree
     draw = () => {
+        this.leaves = this.generateLeaves();
+
+        // Draw the leaves behind the branches
+        this.drawLeaves(-1);
+        this.drawInternodes();
+        // Draw the leaves in front of the branches
+        this.drawLeaves(1);
+    }
+
+    generateLeaves = () => {
+        let leaves = [];
+        for (let i = 0; i < this.apicalMeristems.length; i++) {
+            if (rand() < this.LEAF_PERCENTAGE) {
+                let leafPosition = createVector(this.apicalMeristems[i].position.x, this.apicalMeristems[i].position.y);
+                let leafAngle = this.apicalMeristems[i].angle;
+                let leaf = new Leaf(leafPosition, leafAngle, randChoice([-1, 1]));
+                leaves.push(leaf);
+            }
+        }
+        return leaves;
+    }
+
+    drawInternodes = () => {
         for (let i = 0; i < this.internodes.length; i++) {
             this.internodes[i].draw();
         }
-
-        this.drawLeaves();
     }
 
-    drawLeaves = () => {
-        for (let i = 0; i < this.apicalMeristems.length; i++) {
-            let leafPosition = createVector(this.apicalMeristems[i].position.x, this.apicalMeristems[i].position.y);
-            let leafAngle = this.apicalMeristems[i].angle;
-            let leaf = new Leaf(leafPosition, leafAngle);
-            leaf.draw();
+    drawLeaves = (depth) => {
+        for (let i = 0; i < this.leaves.length; i++) {
+            if (this.leaves[i].depth === depth) {
+                this.leaves[i].draw();
+            }
         }
     }
 
